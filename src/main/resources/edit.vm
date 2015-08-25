@@ -1,0 +1,196 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>#if($item) Edit #else Add #end</title>
+    <style>
+        #xml, #xsl {
+            margin: 0;
+            position: relative;
+            top: 0;
+            width: 100%;
+            height: 500px;
+            bottom: 0px;
+            left: 0;
+            right: 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+#set($path="")
+#if($item)#set($path="../")#end
+<form action='${path}save' method="post" id="frmEdit">
+    <table>
+        <tr>
+            <th>tplID(*):</th>
+            <td>
+                <input placeholder="Please input tplID." name="tplID" value="$!{item.tplID}" maxlength="10"/>
+            </td>
+        </tr>
+        <tr>
+            <th>classID(*):</th>
+            <td>
+                <input placeholder="Please input classID." name="classID" value="$!{item.classID}" maxlength="10"/>
+            </td>
+        </tr>
+        <tr>
+            <th>name:</th>
+            <td>
+                <input placeholder="Please input name." name="name" value="$!{item.name}" />
+            </td>
+        </tr>
+        <tr>
+            <th>keyword(*):</th>
+            <td>
+                <input placeholder="Please input keyword." name="keyword" value="$!{item.keyword}" />
+            </td>
+        </tr>
+        <tr>
+            <th>rank(*):</th>
+            <td>
+                <select name="rank">
+                    <option value="1">No. 1</option>
+                    <option value="2">No. 2</option>
+                    <option value="3">No. 3</option>
+                    <option value="4">No. 4</option>
+                    <option value="5">No. 5</option>
+                    <option value="6">No. 6</option>
+                    <option value="7">No. 7</option>
+                    <option value="8">No. 8</option>
+                    <option value="9">No. 9</option>
+                    <option value="10">No. 10</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>position(*):</th>
+            <td>
+                <select name="position">
+                    <option value="1">Normal</option>
+                    <option value="2">Right</option>
+                    <option value="3">Top</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Xml:</th>
+            <td width="45%">
+                <div style="position: relative" style="width: 100%; height: 400px;">
+                    <div id="xml">$!{item.xml}</div>
+                    <textarea style="display:none" name="xml"></textarea>
+                </div>
+            </td>
+            <th>Xsl:</th>
+            <td width="45%">
+                <div style="position: relative" style="width: 100%; height: 400px;">
+                    <div id="xsl">$!{item.xsl}</div>
+                    <textarea style="display:none" name="xsl"></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Submit" />
+                <input type="reset" value="Reset" />
+            </td>
+        </tr>
+    </table>
+</form>
+<script src="${path}ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="${path}ace/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+<script src="${path}ace/ext-beautify.js" type="text/javascript" charset="utf-8"></script>
+<script src="${path}vkbeautify/vkbeautify.0.99.00.beta.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="${path}js/UIEditor.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+(function(w){
+    var isEdit = #if($item) true #else false #end,
+        classID = "$!{item.classID}",
+        rank = "$!{item.rank}",
+        position = "$!{item.position}";
+    var rankUI, positionUI;
+    var setSelect = function(ui, value){
+        var optionsUI, i, optionUI, isFind = false;
+        if(ui){
+            optionsUI = ui.options;
+            for(i =0; i<optionsUI.length; i++){
+                optionUI = optionsUI[i];
+                if(optionUI && optionUI.value == value){
+                    ui.selectedIndex = i;
+                    isFind = true;
+                    break;
+                }
+            }
+            if(!isFind){
+                ui.selectedIndex = 0;
+            }
+        }
+    }
+    if(isEdit){
+        rankUI = document.querySelector("select[name='rank']"),
+                positionUI = document.querySelector("select[name='position']");
+        setSelect(rankUI, rank);
+        setSelect(positionUI, position);
+    }
+    if(!classID){
+        document.querySelector("input[name='classID']").value = "20000000";
+    }
+})(window);
+</script>
+<script type="text/javascript">
+    (function(w){
+        var UINumber = function(el){
+            var callback = function(){
+                var baseValue = this.baseValue,
+                        value = this.value;
+                if(baseValue!=value){
+                    value = value.replace(/\D/g,'');
+                    this.value = value;
+                    this.baseValue = value;
+                }
+            };
+            if(typeof(el) === "string"){
+                el = document.querySelector(el);
+            }
+            if(el){
+                el.addEventListener("keyup", callback, false);
+                el.addEventListener("paste", function(){
+                    setTimeout(callback.bind(this), 10);
+                }, false);
+                el.addEventListener("afterpaste", function(){
+                    setTimeout(callback.bind(this), 10);
+                }, false);
+            }
+        }
+        UINumber("input[name='tplID']");
+        UINumber("input[name='classID']");
+    })(window);
+</script>
+<script type="text/javascript">
+    ace.require("ace/ext/language_tools");
+    var xmlEditor = new UIEditor({
+        id: "xml", type: "xml"
+    });
+    var xslEditor = new UIEditor({
+        id: "xsl", type: "xml"
+    });
+    window.onload = function(){
+        var setEditValue = function(edit, ui){
+            var tempValue, tempEditValue = null;
+            if(edit && ui){
+                tempEditValue = edit.editor.getValue();
+                tempValue = ui.value;
+                if(!tempEditValue && tempValue){
+                    edit.editor.getSession().doc.setValue(tempValue);
+                }
+            }
+        }
+        setEditValue(xmlEditor, document.querySelector("[name='xml']"));
+        setEditValue(xslEditor, document.querySelector("[name='xsl']"));
+    };
+    document.getElementById("frmEdit").onsubmit = function(){
+        document.querySelector("[name='xml']").value = xmlEditor.editor.getValue();
+        document.querySelector("[name='xsl']").value = xslEditor.editor.getValue();
+    }
+</script>
+</body>
+</html>

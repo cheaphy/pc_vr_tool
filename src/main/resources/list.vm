@@ -1,0 +1,218 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>List</title>
+    <link href="css/common.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        table.t1 {
+            font-family: verdana,arial,sans-serif;
+            font-size:11px;
+            color:#333333;
+            border-width: 1px;
+            border-color: #a9c6c9;
+            border-collapse: collapse;
+        }
+        table.t1 th {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #a9c6c9;
+        }
+        table.t1 td {
+            border-width: 1px;
+            padding: 8px;
+            border-style: solid;
+            border-color: #a9c6c9;
+        }
+        table.t1 tr.item:nth-child(2n){
+            background-color:#d4e3e5;
+        }
+        table.t1 tr.item:nth-child(2n+1){
+            background-color:#c3dde0;
+        }
+        table.t1 tr.item:hover{
+            background-color: #ffff66;
+        }
+        table.t1 tr.item-head{
+            background-color:#d4e3e5;
+        }
+        table.t1 tr.item-no-data{
+            background-color:#c3dde0;
+            height: 60px;
+        }
+        table.t1 tr.item-no-data td{
+            text-align: center;
+            vertical-align: middle;
+        }
+        table.t1 a{
+            text-decoration:none;
+            height:1em;
+        }
+        table.t1 a:link, table.t1  a:visited{
+            color:#3366CC;
+        }
+        table.t1  a:hover{                                      /* 鼠标经过时 */
+            color:#B50000;
+            text-decoration:underline;
+        }
+        .add{
+            margin: 0 5px;
+            text-decoration:none;
+            height:1em;
+        }
+        .add:link, add:visited{
+            color:#3366CC;
+        }
+        .add:hover{
+            color:#B50000;
+            text-decoration:underline;
+        }
+        .search-label{
+            margin-left: 10px;;
+        }
+        .search-form{
+            margin-top:10px;
+            margin-left:20px;
+            margin-right:20px;
+            margin-bottom:5px;
+            width: 96%;
+        }
+    </style>
+</head>
+<body>
+<h1 style="margin-left: 20px;">VR List</h1>
+<form method="get" action="list" id="frmSearch" class="search-form">
+    <label for="txtSearchTplID">tplID:</label>
+    <input type="text" name="tplID" value="$!{query.tplID}" maxlength="10" style="width: 100px;" pattern="[0-9]*"/>
+    <label for="txtSearchClassID">classID:</label>
+    <input type="text" name="classID" value="$!{query.classID}" maxlength="10" style="width: 100px;" pattern="[0-9]*"/>
+    <label for="txtSearchKeyword" class="search-label">keyword:</label>
+    <input type="text" name="keyword" value="$!{query.keyword}" />
+    <label for="txtSearchPosition" class="search-label">position:</label>
+    <select name="position" id="txtSearchPosition">
+        <option value="">--Please Select--</option>
+        <option value="1">Normal</option>
+        <option value="2">Right</option>
+        <option value="3">Top</option>
+    </select>
+    <label for="txtSearchRank" class="search-label">rank:</label>
+    <select name="rank">
+        <option value="">--Please Select--</option>
+        <option value="1">No. 1</option>
+        <option value="2">No. 2</option>
+        <option value="3">No. 3</option>
+        <option value="4">No. 4</option>
+        <option value="5">No. 5</option>
+        <option value="6">No. 6</option>
+        <option value="7">No. 7</option>
+        <option value="8">No. 8</option>
+        <option value="9">No. 9</option>
+        <option value="10">No. 10</option>
+    </select>
+    <a class="button blue" href="javascript:document.getElementById('frmSearch').submit();">Search</a>
+    <a class="button blue" href="add" target="_blank">Add</a>
+</form>
+<table class="t1 search-form">
+    <thead>
+    <tr class="item-head">
+        <th>tplID</th>
+        <th>classID</th>
+        <th>name</th>
+        <th>keyword</th>
+        <th>position</th>
+        <th>rank</th>
+        <th>options</th>
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($item in $list)
+        <tr class="item">
+            #set($str=$item.position)
+            #if($str==1)
+                #set($str="Normal")
+            #elseif($str==2)
+                #set($str="Right")
+            #elseif($str==3)
+                #set($str="Top")
+            #end
+            <td>${item.tplID}</td>
+            <td>${item.classID}</td>
+            <td>$!{item.name}</td>
+            <td>$!{item.keyword}</td>
+            <td>$!{str}</td>
+            <td>$!{item.rank}</td>
+            <td>
+                <a target="_blank" href="edit/${item.tplID}">Edit</a>
+                <a target="_blank" href="delete/${item.tplID}" onclick="return confirm('Be sure to delete?')">Delete</a>
+                <a target="_blank" href="/web?query=${item.keyword}&ie=utf-8">View</a>
+            </td>
+        </tr>
+        #end
+        #if($list.size()==0)
+            <tr class="item-no-data">
+                <td colspan="10">No data was found.</td>
+            </tr>
+        #end
+    </tbody>
+</table>
+<script type="text/javascript">
+    (function(w){
+    var rank = "$!{query.rank}",
+            position = "$!{query.position}";
+        var rankUI, positionUI;
+        var setSelect = function(ui, value){
+            var optionsUI, i, optionUI, isFind = false;
+            if(ui){
+                optionsUI = ui.options;
+                for(i =0; i<optionsUI.length; i++){
+                    optionUI = optionsUI[i];
+                    if(optionUI && optionUI.value == value){
+                        ui.selectedIndex = i;
+                        isFind = true;
+                        break;
+                    }
+                }
+                if(!isFind){
+                    ui.selectedIndex = 0;
+                }
+            }
+        }
+        if(rank || position){
+            rankUI = document.querySelector("select[name='rank']"),
+                    positionUI = document.querySelector("select[name='position']");
+            setSelect(rankUI, rank);
+            setSelect(positionUI, position);
+        }
+    })(window);
+</script>
+<script type="text/javascript">
+ (function(w){
+     var UINumber = function(el){
+         var callback = function(){
+             var baseValue = this.baseValue,
+                     value = this.value;
+             if(baseValue!=value){
+                 value = value.replace(/\D/g,'');
+                 this.value = value;
+                 this.baseValue = value;
+             }
+         };
+         if(typeof(el) === "string"){
+             el = document.querySelector(el);
+         }
+         if(el){
+            el.addEventListener("keyup", callback, false);
+            el.addEventListener("paste", function(){
+                setTimeout(callback.bind(this), 10);
+            }, false);
+            el.addEventListener("afterpaste", function(){
+                setTimeout(callback.bind(this), 10);
+            }, false);
+         }
+     }
+     UINumber("input[name='tplID']");
+     UINumber("input[name='classID']");
+ })(window);
+</script>
+</body>
+</html>
